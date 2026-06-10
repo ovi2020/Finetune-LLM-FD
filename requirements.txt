@@ -1,0 +1,40 @@
+# IBM Granite Fraud Detection Fine-Tuning
+# Python 3.10+ required
+
+# ── Core ML / LLM stack ──────────────────────────────────────────────────────
+torch>=2.2.0
+transformers>=4.47.0
+datasets>=2.21.0
+tokenizers>=0.20.0
+accelerate>=0.34.0
+peft>=0.12.0
+trl>=0.11.0
+bitsandbytes>=0.43.0         # QLoRA / 4-bit & 8-bit quantization
+
+# ── Data processing ──────────────────────────────────────────────────────────
+pandas>=2.1.0
+numpy>=1.26.0
+pyarrow>=14.0.0              # Parquet read/write
+scikit-learn>=1.4.0
+imbalanced-learn>=0.12.0     # SMOTE + RandomUnderSampler
+
+# ── Visualization & evaluation ───────────────────────────────────────────────
+matplotlib>=3.8.0
+seaborn>=0.13.0
+
+# ── Optional: experiment tracking ───────────────────────────────────────────
+# wandb                       # uncomment for Weights & Biases
+tensorboard>=2.15.0
+
+# ── Optional: Flash Attention (A100 / H100 GPUs only) ───────────────────────
+# flash-attn>=2.5.0            # pip install flash-attn --no-build-isolation
+
+# ── Optional: DeepSpeed (for 70B multi-GPU training) ────────────────────────
+# deepspeed>=0.14.0            # pip install deepspeed
+
+# ── Kaggle dataset download ──────────────────────────────────────────────────
+kaggle>=1.6.0
+
+# ── Jupyter / interactive ────────────────────────────────────────────────────
+jupyterlab>=4.0.0
+ipywidgets>=8.0.0
