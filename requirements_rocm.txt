@@ -1,0 +1,61 @@
+# requirements_rocm.txt
+# IBM Granite Fraud Detection – AMD MI300X / ROCm Dependencies
+# ─────────────────────────────────────────────────────────────
+# Python 3.10+  |  ROCm 6.2+  |  gfx942 (MI300X)
+#
+# STEP 1 – ROCm-enabled PyTorch (do this first, before pip install):
+#   pip install torch torchvision \
+#     --index-url https://download.pytorch.org/whl/rocm6.2
+#
+# STEP 2 – ROCm bitsandbytes (pre-built wheel for MI210/MI300X and newer):
+#   pip install --no-deps --force-reinstall \
+#     'https://github.com/bitsandbytes-foundation/bitsandbytes/releases/\
+#      download/continuous-release_multi-backend-refactor/\
+#      bitsandbytes-0.44.1.dev0-py3-none-manylinux_2_24_x86_64.whl'
+#
+# STEP 3 – Everything else (this file):
+#   pip install -r requirements_rocm.txt
+# ─────────────────────────────────────────────────────────────
+
+# ── Core LLM / fine-tuning ──────────────────────────────────────
+transformers>=4.47.0
+datasets>=2.21.0
+tokenizers>=0.20.0
+accelerate>=0.34.0
+peft>=0.12.0
+trl>=0.11.0
+# bitsandbytes: install via ROCm wheel (see above), NOT from PyPI
+deepspeed>=0.14.0
+
+# ── vLLM (ROCm build) ───────────────────────────────────────────
+# Option A – pip (may not have latest ROCm optimisations):
+#   pip install vllm
+#
+# Option B – ROCm Docker (recommended for best MI300X performance):
+#   docker pull rocm/vllm:instinct_main
+#
+# Option C – build from source for gfx942:
+#   git clone https://github.com/vllm-project/vllm
+#   cd vllm
+#   DOCKER_BUILDKIT=1 docker build -f Dockerfile.rocm -t vllm-rocm .
+#
+# Uncomment only if using Option A:
+# vllm>=0.4.0
+
+# ── vLLM client (for server mode) ───────────────────────────────
+openai>=1.0.0
+
+# ── Data processing ─────────────────────────────────────────────
+pandas>=2.1.0
+numpy>=1.26.0
+pyarrow>=14.0.0
+scikit-learn>=1.4.0
+imbalanced-learn>=0.12.0
+
+# ── Evaluation & visualisation ───────────────────────────────────
+matplotlib>=3.8.0
+seaborn>=0.13.0
+tensorboard>=2.15.0
+
+# ── Kaggle dataset download ──────────────────────────────────────
+kaggle>=1.6.0

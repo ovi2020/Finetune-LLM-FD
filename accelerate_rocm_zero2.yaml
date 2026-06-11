@@ -1,0 +1,22 @@
+# accelerate_rocm_zero2.yaml
+# ─────────────────────────────────────────────────────────────────
+# HuggingFace Accelerate config for multi-GPU training on MI300X
+# Uses DeepSpeed ZeRO-2 (recommended for 8B model on 2-4 GPUs)
+#
+# Usage:
+#   accelerate launch --config_file accelerate_rocm_zero2.yaml \
+#       04_finetune_granite_rocm.py
+# ─────────────────────────────────────────────────────────────────
+compute_environment: LOCAL_MACHINE
+distributed_type: DEEPSPEED
+downcast_bf16: 'no'
+machine_rank: 0
+main_training_function: main
+mixed_precision: bf16
+num_machines: 1
+num_processes: 4           # change to number of MI300X GPUs to use
+use_cpu: false
+
+deepspeed_config:
+  deepspeed_config_file: ds_zero2_rocm.json
+  zero3_init_flag: false
