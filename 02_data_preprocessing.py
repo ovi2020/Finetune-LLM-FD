@@ -78,16 +78,46 @@ def apply_smote_undersample(X_train, y_train,
                              sampling_strategy_under=0.5):
     """
     Two-step resampling for extreme class imbalance:
-      Step 1 – SMOTE: oversample minority to 10% of majority
-      Step 2 – RandomUnderSampler: undersample majority to 50% of minority
-    Returns balanced X, y as DataFrames.
+      Step 1 – SMOTE: oversample minority to `sampling_strategy_over` ratio
+               (minority / majority). Skipped if minority is already at or
+               above the target ratio — avoids the imblearn ValueError.
+      Step 2 – RandomUnderSampler: undersample majority so minority reaches
+               `sampling_strategy_under` ratio. Skipped if already there.
+    Returns resampled X, y as DataFrames/Series.
     """
-    cols  = X_train.columns.tolist()
-    over  = SMOTE(sampling_strategy=sampling_strategy_over,
-                  random_state=RANDOM_SEED, k_neighbors=5)
-    under = RandomUnderSampler(sampling_strategy=sampling_strategy_under,
-                               random_state=RANDOM_SEED)
-    pipe  = ImbPipeline([("over", over), ("under", under)])
+    cols = X_train.columns.tolist()
+    counts = y_train.value_counts()
+    n_majority = counts[0]
+    n_minority = counts[1]
+    current_ratio = n_minority / n_majority  # minority / majority
+
+    steps = []
+
+    # Only SMOTE if minority is genuinely below the target ratio
+    if current_ratio < sampling_strategy_over:
+        steps.append(("over", SMOTE(sampling_strategy=sampling_strategy_over,
+                                    random_state=RANDOM_SEED, k_neighbors=5)))
+    else:
+        print(f"  [SMOTE skipped] minority ratio {current_ratio:.3f} already "
+              f">= target {sampling_strategy_over}")
+
+    # Only undersample if majority still needs trimming
+    # After possible SMOTE, recompute expected ratio to validate under step
+    expected_minority = max(n_minority, int(n_majority * sampling_strategy_over))
+    expected_ratio_after_over = expected_minority / n_majority
+    if expected_ratio_after_over < sampling_strategy_under:
+        steps.append(("under", RandomUnderSampler(
+            sampling_strategy=sampling_strategy_under,
+            random_state=RANDOM_SEED)))
+    else:
+        print(f"  [UnderSampler skipped] ratio {expected_ratio_after_over:.3f} "
+              f"already >= target {sampling_strategy_under}")
+
+    if not steps:
+        print("  [Resampling skipped] data already meets both ratio targets.")
+        return X_train.copy(), y_train.copy()
+
+    pipe = ImbPipeline(steps)
     X_res, y_res = pipe.fit_resample(X_train, y_train)
     return pd.DataFrame(X_res, columns=cols), pd.Series(y_res, name=y_train.name)
 
